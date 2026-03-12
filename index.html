@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Vendora · Connexion</title>
+    <title>Vendora · Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style id="theme-style">
         /* Thème par défaut (sombre/violet) */
@@ -176,6 +176,42 @@
             font-size: 18px;
             box-shadow: 0 0 0 2px rgba(255,255,255,0.1), var(--accent-glow);
         }
+        /* Sélecteur de thème rapide dans le header */
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 12px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.35);
+            border: 1px solid rgba(148,163,184,0.35);
+            backdrop-filter: blur(18px);
+        }
+        .theme-pill {
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+        .theme-pill:hover {
+            transform: translateY(-1px) scale(1.05);
+            color: var(--text-primary);
+            background: rgba(148,163,184,0.2);
+            box-shadow: 0 0 0 1px rgba(148,163,184,0.6);
+        }
+        .theme-pill.theme-dark { }
+        .theme-pill.theme-light { }
+        .theme-pill.theme-blue { }
+        .theme-pill.theme-green { }
         /* Barre de navigation en bas */
         .bottom-nav {
             position: fixed;
@@ -662,6 +698,10 @@
             display: flex;
             flex-direction: column;
         }
+        .stock-card.low-stock {
+            border-color: rgba(248,113,113,0.8);
+            box-shadow: 0 0 0 1px rgba(248,113,113,0.7), 0 16px 30px rgba(127,29,29,0.55);
+        }
         .stock-card:hover {
             background: var(--card-bg-hover);
             transform: translateY(-6px);
@@ -835,64 +875,6 @@
             margin-bottom: 10px;
             font-size: 14px;
         }
-        /* Page de connexion */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .login-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            border: var(--border-light);
-            border-radius: 40px;
-            padding: 40px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: var(--shadow-card);
-        }
-        .login-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            text-align: center;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .login-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .login-tab {
-            flex: 1;
-            padding: 12px;
-            border-radius: 30px;
-            background: rgba(255,255,255,0.05);
-            border: var(--border-light);
-            color: var(--text-secondary);
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        .login-tab.active {
-            background: var(--primary-gradient);
-            color: white;
-        }
-        .login-form {
-            display: none;
-        }
-        .login-form.active {
-            display: block;
-        }
-        .logout-btn {
-            margin-top: 20px;
-            width: 100%;
-        }
         /* Bouton flottant pour mobile */
         .fab {
             position: fixed;
@@ -990,60 +972,160 @@
         .animate-in {
             animation: slideIn 0.5s ease forwards;
         }
+        /* Animations et styles supplémentaires pour les graphiques / insights */
+        .chart-card {
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 0 0, rgba(122,95,255,0.25), transparent 55%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+        .chart-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(122,95,255,0.6);
+        }
+        .chart-card:hover::before {
+            opacity: 1;
+        }
+        .chart-card canvas {
+            filter: drop-shadow(0 12px 25px rgba(0,0,0,0.45));
+        }
+        .charts-grid .chart-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+        .charts-grid .chart-card:nth-child(2) {
+            animation-delay: 0.12s;
+        }
+        @keyframes pulseSoft {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(122,95,255,0.45); }
+            70% { transform: scale(1.01); box-shadow: 0 0 0 12px rgba(122,95,255,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(122,95,255,0); }
+        }
+        .revenue-card {
+            animation: pulseSoft 3.5s ease-in-out infinite;
+        }
+        /* Cartes d'insights supplémentaires sur le dashboard */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin: 10px 0 28px;
+        }
+        .insight-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 18px 20px;
+            border: var(--border-light);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .insight-card::after {
+            content: '';
+            position: absolute;
+            right: -40px;
+            top: -40px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .insight-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-secondary);
+        }
+        .insight-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .insight-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .insight-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        /* Transition douce entre les pages */
+        .page-transition {
+            animation: slideIn 0.45s ease-out forwards;
+        }
+        /* Effet de cascade sur certains éléments */
+        .kpi-grid .kpi-card:nth-child(1) { animation-delay: 0.02s; }
+        .kpi-grid .kpi-card:nth-child(2) { animation-delay: 0.06s; }
+        .kpi-grid .kpi-card:nth-child(3) { animation-delay: 0.10s; }
+        .kpi-grid .kpi-card:nth-child(4) { animation-delay: 0.14s; }
+        .stock-grid .stock-card:nth-child(1),
+        .platform-grid .platform-card:nth-child(1) { animation-delay: 0.02s; }
+        .stock-grid .stock-card:nth-child(2),
+        .platform-grid .platform-card:nth-child(2) { animation-delay: 0.06s; }
+        /* Confettis pour les nouvelles ventes */
+        .confetti-piece {
+            position: fixed;
+            top: -10px;
+            width: 8px;
+            height: 14px;
+            border-radius: 2px;
+            z-index: 1200;
+            opacity: 0.9;
+            pointer-events: none;
+            animation: confettiFall 1.4s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% {
+                transform: translate3d(0, -40px, 0) rotateZ(0deg);
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate3d(20px, 110vh, 0) rotateZ(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Conteneur de connexion (caché après login) -->
-    <div id="loginContainer" class="login-container">
-        <div class="login-card">
-            <div class="login-title">Vendora</div>
-            <div class="login-tabs">
-                <div class="login-tab active" onclick="showLoginTab('login')">Connexion</div>
-                <div class="login-tab" onclick="showLoginTab('register')">Inscription</div>
-            </div>
-            <div id="loginForm" class="login-form active">
-                <div class="form-group" style="margin-bottom:20px;">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" class="form-control" placeholder="exemple@email.com">
-                </div>
-                <div class="form-group" style="margin-bottom:20px;">
-                    <label>Mot de passe</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="********">
-                </div>
-                <button class="btn btn-primary" style="width:100%;" onclick="handleLogin()">Se connecter</button>
-            </div>
-            <div id="registerForm" class="login-form">
-                <div class="form-group" style="margin-bottom:20px;">
-                    <label>Nom</label>
-                    <input type="text" id="registerName" class="form-control" placeholder="Jean Dupont">
-                </div>
-                <div class="form-group" style="margin-bottom:20px;">
-                    <label>Email</label>
-                    <input type="email" id="registerEmail" class="form-control" placeholder="exemple@email.com">
-                </div>
-                <div class="form-group" style="margin-bottom:20px;">
-                    <label>Mot de passe</label>
-                    <input type="password" id="registerPassword" class="form-control" placeholder="********">
-                </div>
-                <button class="btn btn-primary" style="width:100%;" onclick="handleRegister()">S'inscrire</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Application (cachée tant que non connecté) -->
-    <div id="appContainer" class="app" style="display: none;">
+    <!-- Application accessible directement -->
+    <div id="appContainer" class="app">
         <!-- Header avec logo -->
         <div class="header">
             <div class="logo-area">
                 <div class="logo-icon">V</div>
                 <span class="logo-text">Vendora</span>
             </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="theme-switcher">
+                    <button class="theme-pill theme-dark" onclick="selectTheme('dark')" title="Thème sombre">☾</button>
+                    <button class="theme-pill theme-light" onclick="selectTheme('light')" title="Thème clair">☀</button>
+                    <button class="theme-pill theme-blue" onclick="selectTheme('blue')" title="Bleu profond">🟦</button>
+                    <button class="theme-pill theme-green" onclick="selectTheme('green')" title="Vert forêt">🌿</button>
+                </div>
             <div class="profile" onclick="changePage('profil')">
                 <div class="profile-info">
-                    <div class="profile-name" id="headerName">Utilisateur</div>
+                    <div class="profile-name" id="headerName">Visiteur</div>
                     <div class="profile-role" id="headerRole">Vendeur</div>
                 </div>
-                <div class="profile-pic" id="headerAvatar">U</div>
+                <div class="profile-pic" id="headerAvatar">V</div>
+            </div>
             </div>
         </div>
 
@@ -1053,8 +1135,8 @@
         </div>
     </div>
 
-    <!-- Barre de navigation en bas (cachée tant que non connecté) -->
-    <div class="bottom-nav" id="bottomNav" style="display: none;">
+    <!-- Barre de navigation en bas -->
+    <div class="bottom-nav" id="bottomNav">
         <div class="nav-item" onclick="changePage('accueil')">Accueil</div>
         <div class="nav-item" onclick="changePage('dashboard')">Tableau de bord</div>
         <div class="nav-item" onclick="changePage('statistiques')">Statistiques</div>
@@ -1065,7 +1147,7 @@
     </div>
 
     <!-- Bouton flottant pour ajout rapide (mobile) -->
-    <button class="fab" id="fab" style="display: none;" onclick="quickAddMobile()" title="Ajouter une vente rapide">+</button>
+    <button class="fab" onclick="quickAddMobile()" title="Ajouter une vente rapide">+</button>
 
     <!-- Modal pour le stock -->
     <div class="modal" id="stockModal">
@@ -1115,105 +1197,15 @@
     </div>
 
     <script>
-        // ---------- Gestion de la connexion ----------
-        let currentUser = null;
-
-        // Récupérer les utilisateurs stockés
-        function getUsers() {
-            return JSON.parse(localStorage.getItem('users')) || [];
-        }
-
-        function saveUsers(users) {
-            localStorage.setItem('users', JSON.stringify(users));
-        }
-
-        // Vérifier si un utilisateur est déjà connecté (session)
-        const savedUser = localStorage.getItem('currentUser');
-        if (savedUser) {
-            currentUser = JSON.parse(savedUser);
-            showApp();
-        } else {
-            // Afficher la page de connexion
-            document.getElementById('loginContainer').style.display = 'flex';
-        }
-
-        function showLoginTab(tab) {
-            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
-            if (tab === 'login') {
-                document.querySelector('.login-tab[onclick*="login"]').classList.add('active');
-                document.getElementById('loginForm').classList.add('active');
-            } else {
-                document.querySelector('.login-tab[onclick*="register"]').classList.add('active');
-                document.getElementById('registerForm').classList.add('active');
-            }
-        }
-
-        function handleRegister() {
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value;
-            if (!name || !email || !password) {
-                alert('Veuillez remplir tous les champs.');
-                return;
-            }
-            const users = getUsers();
-            if (users.find(u => u.email === email)) {
-                alert('Cet email est déjà utilisé.');
-                return;
-            }
-            const newUser = { name, email, password, avatar: name.substring(0,2).toUpperCase() };
-            users.push(newUser);
-            saveUsers(users);
-            alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
-            showLoginTab('login');
-        }
-
-        function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const users = getUsers();
-            const user = users.find(u => u.email === email && u.password === password);
-            if (!user) {
-                alert('Email ou mot de passe incorrect.');
-                return;
-            }
-            currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            showApp();
-        }
-
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('appContainer').style.display = 'none';
-            document.getElementById('bottomNav').style.display = 'none';
-            document.getElementById('fab').style.display = 'none';
-        }
-
-        function showApp() {
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'flex';
-            document.getElementById('bottomNav').style.display = 'flex';
-            document.getElementById('fab').style.display = 'flex';
-            // Mettre à jour le profil
-            updateHeader();
-            loadPage('accueil');
-        }
-
-        // ---------- Données (globales) ----------
+        // ---------- Données ----------
         let sales = JSON.parse(localStorage.getItem('sales')) || [];
-        let stock = JSON.parse(localStorage.getItem('stock')) || []; // vide initialement
-        let profile = { ...currentUser }; // copie
+        let stock = JSON.parse(localStorage.getItem('stock')) || [];
+        let profile = JSON.parse(localStorage.getItem('profile')) || {
+            name: 'Visiteur',
+            avatar: 'V',
+            role: 'Vendeur'
+        };
 
-        // Si aucune vente, on laisse vide (l'utilisateur ajoutera)
-        if (sales.length === 0) {
-            sales = []; // on vide
-            localStorage.setItem('sales', JSON.stringify(sales));
-        }
-
-        // Préférences utilisateur
         let preferences = JSON.parse(localStorage.getItem('preferences')) || {
             theme: 'dark',
             widgets: {
@@ -1242,10 +1234,11 @@
         let currentStockSearch = '';
 
         function updateHeader() {
-            document.getElementById('headerName').textContent = currentUser?.name || 'Utilisateur';
-            document.getElementById('headerRole').textContent = 'Vendeur';
-            document.getElementById('headerAvatar').textContent = currentUser?.avatar || 'U';
+            document.getElementById('headerName').textContent = profile.name;
+            document.getElementById('headerRole').textContent = profile.role;
+            document.getElementById('headerAvatar').textContent = profile.avatar;
         }
+        updateHeader();
 
         function changePage(page) {
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -1255,57 +1248,75 @@
 
         function loadPage(page) {
             const area = document.getElementById('contentArea');
+            let html = '';
             switch(page) {
                 case 'accueil':
-                    area.innerHTML = getAccueilPage();
+                    html = getAccueilPage();
                     break;
                 case 'dashboard':
-                    area.innerHTML = getDashboardPage();
-                    setTimeout(() => { initDashboardCharts(); updateDashboardCharts(); }, 100);
+                    html = getDashboardPage();
                     break;
                 case 'statistiques':
-                    area.innerHTML = getStatistiquesPage();
-                    setTimeout(() => { initStatistiquesCharts(); }, 100);
+                    html = getStatistiquesPage();
                     break;
                 case 'achatvente':
-                    area.innerHTML = getAchatVentePage();
+                    html = getAchatVentePage();
                     break;
                 case 'stock':
-                    area.innerHTML = getStockPage();
-                    setTimeout(() => { initStockFilters(); }, 100);
+                    html = getStockPage();
                     break;
                 case 'profil':
-                    area.innerHTML = getProfilPage();
+                    html = getProfilPage();
                     break;
                 case 'personnalisation':
-                    area.innerHTML = getPersonnalisationPage();
+                    html = getPersonnalisationPage();
                     break;
                 default:
-                    area.innerHTML = getAccueilPage();
+                    html = getAccueilPage();
+            }
+            area.innerHTML = `<div class="page-transition">${html}</div>`;
+            // Initialisations spécifiques après rendu
+            if (page === 'dashboard') {
+                setTimeout(() => { initDashboardCharts(); updateDashboardCharts(); }, 100);
+            } else if (page === 'statistiques') {
+                setTimeout(() => { initStatistiquesCharts(); }, 100);
+            } else if (page === 'stock') {
+                setTimeout(() => { initStockFilters(); }, 100);
             }
         }
 
         // Page Accueil
         function getAccueilPage() {
+            const totalRevenue = sales.reduce((a,b)=>a+b.price,0);
+            const nbSales = sales.length;
+            const hasData = nbSales > 0;
+            const vintedTotal = sales.filter(s=>s.platform==='vinted').reduce((a,b)=>a+b.price,0);
+            const lbcTotal = sales.filter(s=>s.platform==='leboncoin').reduce((a,b)=>a+b.price,0);
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? 'Bonjour' : (hour < 18 ? 'Bon après-midi' : 'Bonsoir');
+
             return `
                 <div class="welcome-card animate-in">
                     <div class="welcome-text">
-                        <h1>Bienvenue sur Vendora</h1>
+                        <h1>${greeting}, bienvenue sur Vendora</h1>
                         <p>Votre assistant personnel pour gérer vos ventes sur Vinted et Le Bon Coin. Suivez vos revenus, gérez votre stock, et progressez.</p>
                         <div class="feature-tags">
                             <div class="feature-tag"><span style="font-size:24px;">📊</span> Statistiques en temps réel</div>
                             <div class="feature-tag"><span style="font-size:24px;">📦</span> Gestion de stock</div>
+                            ${hasData ? `<div class="feature-tag"><span style="font-size:24px;">💶</span> ${formatPrice(totalRevenue)} générés</div>` : ''}
                         </div>
                     </div>
                     <div class="welcome-icon">🚀</div>
                 </div>
-                <div style="text-align: center; margin-top: 50px; color: var(--text-secondary);">
-                    <p>Utilisez la navigation en bas pour accéder aux différentes fonctionnalités.</p>
+                <div style="text-align: center; margin-top: 40px; color: var(--text-secondary);">
+                    ${hasData
+                        ? `<p>Vous avez déjà enregistré <strong>${nbSales}</strong> vente${nbSales>1?'s':''} (${formatPrice(vintedTotal)} sur Vinted, ${formatPrice(lbcTotal)} sur Le Bon Coin).</p>`
+                        : `<p>Aucune vente enregistrée pour l’instant. Commencez par ajouter votre première vente dans le tableau de bord !</p>`}
                 </div>
             `;
         }
 
-        // Page Dashboard (inchangée)
+        // Page Dashboard
         function getDashboardPage() {
             const today = new Date().toDateString();
             const todaySales = sales.filter(s => new Date(s.date).toDateString() === today);
@@ -1318,6 +1329,54 @@
             const lbcTotal = sales.filter(s=>s.platform==='leboncoin').reduce((a,b)=>a+b.price,0);
             const totalRevenue = sales.reduce((a,b)=>a+b.price,0);
 
+            // Insights avancés (meilleur jour, produit top, panier moyen)
+            let bestDayLabel = '—';
+            let bestDayValue = 0;
+            let avgBasket = 0;
+            let topProductName = '—';
+            let topProductRevenue = 0;
+            let streakDays = 0;
+
+            if (sales.length > 0) {
+                // Regroupement par jour
+                const byDay = {};
+                const byProduct = {};
+                sales.forEach(s => {
+                    const d = new Date(s.date);
+                    const key = d.toDateString();
+                    byDay[key] = (byDay[key] || 0) + s.price;
+                    byProduct[s.product] = (byProduct[s.product] || 0) + s.price;
+                });
+
+                Object.keys(byDay).forEach(k => {
+                    if (byDay[k] > bestDayValue) {
+                        bestDayValue = byDay[k];
+                        bestDayLabel = new Date(k).toLocaleDateString('fr-FR');
+                    }
+                });
+
+                Object.keys(byProduct).forEach(p => {
+                    if (byProduct[p] > topProductRevenue) {
+                        topProductRevenue = byProduct[p];
+                        topProductName = p || 'Produit sans nom';
+                    }
+                });
+
+                avgBasket = totalRevenue / sales.length;
+
+                // Série de jours consécutifs avec au moins une vente (en partant d'aujourd'hui)
+                let cursor = new Date();
+                while (true) {
+                    const hasSales = sales.some(s => new Date(s.date).toDateString() === cursor.toDateString());
+                    if (hasSales) {
+                        streakDays++;
+                        cursor.setDate(cursor.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+            }
+
             let html = `
                 <div class="revenue-card animate-in">
                     <div class="revenue-label">CHIFFRE D'AFFAIRES TOTAL</div>
@@ -1326,6 +1385,37 @@
                     <div class="revenue-footer"><div>📦 Toutes plateformes</div><div>⏰ Depuis le début</div></div>
                 </div>
             `;
+            // Bloc d'insights si au moins une vente
+            if (sales.length > 0) {
+                html += `
+                <div class="insights-grid animate-in">
+                    <div class="insight-card">
+                        <div class="insight-icon">🏆</div>
+                        <div class="insight-label">Meilleur jour</div>
+                        <div class="insight-value">${bestDayLabel}</div>
+                        <div class="insight-sub">${formatPrice(bestDayValue)} sur cette journée</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-icon">🛒</div>
+                        <div class="insight-label">Panier moyen</div>
+                        <div class="insight-value">${formatPrice(avgBasket || 0)}</div>
+                        <div class="insight-sub">${sales.length} vente${sales.length>1?'s':''} au total</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-icon">⭐</div>
+                        <div class="insight-label">Produit le plus rentable</div>
+                        <div class="insight-value">${topProductName}</div>
+                        <div class="insight-sub">${formatPrice(topProductRevenue || 0)} générés</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-icon">🔥</div>
+                        <div class="insight-label">Série de jours avec ventes</div>
+                        <div class="insight-value">${streakDays || 0} jour${streakDays>1?'s':''}</div>
+                        <div class="insight-sub">Nombre de jours consécutifs avec au moins une vente</div>
+                    </div>
+                </div>
+                `;
+            }
             if (preferences.widgets.kpi) {
                 html += `
                 <div class="kpi-grid">
@@ -1383,7 +1473,7 @@
             return html;
         }
 
-        // Page Statistiques avancées (inchangée)
+        // Page Statistiques avancées
         function getStatistiquesPage() {
             const last30Days = sales.filter(s => new Date(s.date) >= new Date(Date.now() - 30*86400000));
             const avgDaily = last30Days.reduce((a,b)=>a+b.price,0) / 30 || 0;
@@ -1443,7 +1533,7 @@
             document.getElementById('filteredSalesTable').innerHTML = getFilteredSalesTable(filter);
         }
 
-        // --- Page Stock (vide au départ) ---
+        // --- Page Stock ---
         function getStockPage() {
             const categories = [...new Set(stock.map(item => item.category))];
             const categoryOptions = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
@@ -1480,7 +1570,7 @@
                 return '<p style="text-align:center; padding:20px;">Aucun produit trouvé</p>';
             }
             return filtered.map(item => `
-                <div class="stock-card">
+                <div class="stock-card ${item.quantity <= (item.threshold || 2) ? 'low-stock' : ''} animate-in">
                     <div class="stock-image" onclick="uploadStockImage(${item.id})">
                         ${item.image ? `<img src="${item.image}" alt="${item.name}">` : '<div class="placeholder">📷</div>'}
                         <input type="file" id="file_${item.id}" accept="image/*" style="display: none;" onchange="handleStockImageUpload(${item.id}, this)">
@@ -1635,7 +1725,7 @@
             }
         }
 
-        // --- Page Personnalisation (inchangée) ---
+        // --- Page Personnalisation ---
         function getPersonnalisationPage() {
             return `
                 <h2 style="margin-bottom:20px;">⚙️ Personnalisation</h2>
@@ -1754,6 +1844,23 @@
             }
         }
 
+        // Effet confettis simple pour les nouvelles ventes
+        function triggerConfetti() {
+            const colors = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#eab308', '#ef4444'];
+            const pieces = 70;
+            for (let i = 0; i < pieces; i++) {
+                const div = document.createElement('div');
+                div.className = 'confetti-piece';
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                div.style.backgroundColor = color;
+                div.style.left = Math.random() * 100 + 'vw';
+                div.style.animationDelay = (Math.random() * 0.3) + 's';
+                div.style.transform = `rotateZ(${Math.random()*360}deg)`;
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 1800);
+            }
+        }
+
         // Demander la permission des notifications au démarrage
         if (window.Notification && Notification.permission === 'default') {
             Notification.requestPermission();
@@ -1768,23 +1875,21 @@
             }, 200);
         }
 
-        // --- Page Profil (avec déconnexion) ---
+        // --- Page Profil (simplifiée, sans déconnexion) ---
         function getProfilPage() {
             return `
                 <div class="profile-section">
                     <div class="profile-card">
-                        <div class="profile-avatar" onclick="changeAvatar()">${currentUser?.avatar || 'U'}</div>
-                        <h3>${currentUser?.name || 'Utilisateur'}</h3>
-                        <p style="color:var(--text-secondary);">${currentUser?.email || ''}</p>
+                        <div class="profile-avatar" onclick="changeAvatar()">${profile.avatar}</div>
+                        <h3>${profile.name}</h3>
+                        <p style="color:var(--text-secondary);">${profile.role}</p>
                         <button class="btn btn-outline" style="margin-top:15px;" onclick="changeAvatar()">Changer photo</button>
-                        <button class="btn btn-primary logout-btn" onclick="logout()">Déconnexion</button>
                     </div>
                     <div class="profile-form">
                         <h3 style="margin-bottom:20px;">Informations personnelles</h3>
                         <div class="form-grid">
-                            <div class="form-group"><label>Nom</label><input class="form-control" id="profileName" value="${currentUser?.name || ''}"></div>
-                            <div class="form-group"><label>Email</label><input class="form-control" id="profileEmail" value="${currentUser?.email || ''}"></div>
-                            <div class="form-group"><label>Rôle</label><input class="form-control" id="profileRole" value="Vendeur"></div>
+                            <div class="form-group"><label>Nom</label><input class="form-control" id="profileName" value="${profile.name}"></div>
+                            <div class="form-group"><label>Rôle</label><input class="form-control" id="profileRole" value="${profile.role}"></div>
                         </div>
                         <div style="margin-top:20px;">
                             <button class="btn btn-primary" onclick="saveProfile()">Sauvegarder</button>
@@ -1796,17 +1901,10 @@
         }
 
         function changeAvatar() {
-            const letters = prompt("Entrez vos initiales (2 lettres max)", currentUser?.avatar || 'U');
+            const letters = prompt("Entrez vos initiales (2 lettres max)", profile.avatar);
             if (letters && letters.length <= 2) {
-                currentUser.avatar = letters.toUpperCase();
-                // Mettre à jour dans la liste des utilisateurs
-                const users = getUsers();
-                const index = users.findIndex(u => u.email === currentUser.email);
-                if (index !== -1) {
-                    users[index].avatar = currentUser.avatar;
-                    saveUsers(users);
-                }
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                profile.avatar = letters.toUpperCase();
+                localStorage.setItem('profile', JSON.stringify(profile));
                 updateHeader();
                 loadPage('profil');
             }
@@ -1814,22 +1912,14 @@
 
         function saveProfile() {
             const newName = document.getElementById('profileName').value.trim();
-            const newEmail = document.getElementById('profileEmail').value.trim();
-            if (!newName || !newEmail) {
-                alert('Veuillez remplir tous les champs.');
+            const newRole = document.getElementById('profileRole').value.trim();
+            if (!newName) {
+                alert('Veuillez entrer un nom.');
                 return;
             }
-            // Mettre à jour dans la liste des utilisateurs
-            const users = getUsers();
-            const index = users.findIndex(u => u.email === currentUser.email);
-            if (index !== -1) {
-                users[index].name = newName;
-                users[index].email = newEmail;
-                saveUsers(users);
-            }
-            currentUser.name = newName;
-            currentUser.email = newEmail;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            profile.name = newName;
+            profile.role = newRole || 'Vendeur';
+            localStorage.setItem('profile', JSON.stringify(profile));
             updateHeader();
             alert('Profil mis à jour');
             loadPage('profil');
@@ -1839,7 +1929,7 @@
             loadPage('profil');
         }
 
-        // --- Ventes (inchangées) ---
+        // --- Ventes ---
         function addSale() {
             const platform = document.getElementById('salePlatform')?.value;
             const product = document.getElementById('saleProduct')?.value.trim();
@@ -1856,6 +1946,8 @@
             if (preferences.notifications) {
                 showNotification('Vente ajoutée', `${product} vendu ${formatPrice(price)}`);
             }
+            // petit effet de confettis pour célébrer la vente
+            triggerConfetti();
             loadPage('dashboard');
         }
 
@@ -1869,7 +1961,7 @@
             const ctx1 = document.getElementById('revenueChart')?.getContext('2d');
             const ctx2 = document.getElementById('platformChart')?.getContext('2d');
             if(ctx1) revenueChart = new Chart(ctx1, { type:'line', data:{ labels:[], datasets:[{ label:'Revenus', data:[], borderColor:'#7a5fff', backgroundColor:'rgba(122,95,255,0.1)', tension:0.4, fill:true, pointBackgroundColor:'#fff', pointBorderColor:'#7a5fff', pointRadius:3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false }, ticks:{ color:'#a0b4d0', maxTicksLimit:6 } }, y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#a0b4d0', callback:v=>v+'€' } } } } });
-            if(ctx2) platformChart = new Chart(ctx2, { type:'doughnut', data:{ labels:['Vinted','Le Bon Coin'], datasets:[{ data:[0,0], backgroundColor:['#3b82f6','#f97316'], borderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:'#a0b4d0', boxWidth:10 } } }, cutout:'65%' } });
+            if(ctx2) platformChart = new Chart(ctx2, { type:'doughnut', data:{ labels:['Vinted','Le Bon Coin'], datasets:[{ data:[0,0], backgroundColor:['#3b82f6','#f97316'], borderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:'#a0b4d0', boxWidth:10 } }, tooltip:{ backgroundColor:'rgba(15,23,42,0.9)', padding:10, cornerRadius:12, callbacks:{ label:(ctx)=>`${ctx.label}: ${ctx.parsed} ventes` } } }, cutout:'65%', animation:{ animateRotate:true, animateScale:true, duration:900, easing:'easeOutQuart' } } });
         }
 
         function updateDashboardCharts() {
@@ -1891,8 +1983,36 @@
             if(ctxLine) {
                 statsLineChart = new Chart(ctxLine, {
                     type: 'line',
-                    data: { labels: [], datasets: [{ label:'Revenus', data:[], borderColor:'#7a5fff', backgroundColor:'rgba(122,95,255,0.1)', tension:0.4, fill:true, pointBackgroundColor:'#fff', pointBorderColor:'#7a5fff', pointRadius:3 }] },
-                    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#a0b4d0', maxTicksLimit:6 } }, y:{ ticks:{ color:'#a0b4d0', callback:v=>v+'€' } } } }
+                    data: { labels: [], datasets: [{ label:'Revenus', data:[], borderColor:'#7a5fff', backgroundColor:'rgba(122,95,255,0.18)', tension:0.35, fill:true, pointBackgroundColor:'#fff', pointBorderColor:'#7a5fff', pointRadius:3, hoverRadius:5 }] },
+                    options: { 
+                        responsive:true, 
+                        maintainAspectRatio:false, 
+                        plugins:{ 
+                            legend:{ display:false },
+                            tooltip:{
+                                backgroundColor:'rgba(15,23,42,0.92)',
+                                padding:10,
+                                cornerRadius:12,
+                                callbacks:{
+                                    label:(ctx)=>` ${ctx.parsed.y.toFixed(2).replace('.',',')} €`
+                                }
+                            }
+                        }, 
+                        animation:{
+                            duration:900,
+                            easing:'easeOutQuart'
+                        },
+                        scales:{ 
+                            x:{ 
+                                ticks:{ color:'#a0b4d0', maxTicksLimit:6 }, 
+                                grid:{ display:false } 
+                            }, 
+                            y:{ 
+                                ticks:{ color:'#a0b4d0', callback:v=>v+'€' }, 
+                                grid:{ color:'rgba(148,163,184,0.15)' }
+                            } 
+                        } 
+                    }
                 });
                 let last30Days = [], labels = [];
                 for(let i=29;i>=0;i--) {
@@ -1938,6 +2058,10 @@
         }
 
         function formatPrice(p) { return p.toFixed(2).replace('.',',') + ' €'; }
+
+        // Initialisation
+        loadPage('accueil');
+        document.querySelectorAll('.nav-item')[0].classList.add('active');
     </script>
 </body>
 </html>
